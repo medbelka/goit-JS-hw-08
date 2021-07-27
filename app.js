@@ -63,3 +63,66 @@ const galleryItems = [
     description: 'Lighthouse Coast Sea',
   },
 ];
+
+const refs = {
+    imagesContainer: document.querySelector('.js-gallery'),
+    modalImage: document.querySelector('.lightbox__image'),
+    closeModalBtn: document.querySelector('[data-action="close-lightbox"]'),
+    lightBox: document.querySelector('.js-lightbox'),
+    overlay: document.querySelector('.lightbox__overlay'),
+}
+
+function createGalleryItemsMarkup(galleryItems) {
+    return galleryItems.map(({preview, original, description}) => {
+        return `<li class="gallery__item">
+        <a
+          class="gallery__link"
+          href="${original}"
+        >
+          <img
+            class="gallery__image"
+            src="${preview}"
+            data-source="${original}"
+            alt="${description}"
+          />
+        </a>
+      </li>`
+    }
+    ).join('');
+}
+
+const cardsMarkup = createGalleryItemsMarkup(galleryItems);
+refs.imagesContainer.insertAdjacentHTML('beforeend', cardsMarkup);
+
+refs.imagesContainer.addEventListener('click', onSelectedImage)
+refs.closeModalBtn.addEventListener('click', onCloseModal)
+refs.overlay.addEventListener('click', onBackdropClick)
+
+function onSelectedImage(evt) {
+    evt.preventDefault();
+    refs.lightBox.classList.add('is-open');
+    window.addEventListener('keydown', onEscKey);
+    const selectedImageEl = evt.target;
+    refs.modalImage.src = selectedImageEl.dataset.source;
+    refs.modalImage.alt = selectedImageEl.alt;
+}
+
+function onEscKey(evt) {
+    const ESC_KEY_CODE = 'Escape';
+    const isEscKey = evt.code === ESC_KEY_CODE;
+    if (isEscKey) {
+        onCloseModal()
+    }
+}
+
+function onCloseModal() {
+    window.removeEventListener('keydown', onEscKey);
+    refs.lightBox.classList.remove('is-open');
+    refs.modalImage.src = '';
+}
+
+function onBackdropClick(evt) {
+    if(evt.currentTarget === evt.target) {
+        onCloseModal();
+    }
+}
